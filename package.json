@@ -13,7 +13,7 @@
     "data:banlist": "node scripts/fetch-banlist.mjs",
     "data:rewards": "node scripts/fetch-rewards.mjs",
     "data:fetch": "npm run data:packs && npm run data:bonus && npm run data:banlist && npm run data:rewards && npm run data:cards",
-    "data:build": "EXPECTED_PLAYABLE=4063 node scripts/build.mjs",
+    "data:build": "EXPECTED_PLAYABLE=4062 node scripts/build.mjs",
     "data:images": "node scripts/fetch-images.mjs",
     "data:all": "npm run data:build",
     "data:refetch": "ALLOW_NETWORK=1 npm run data:fetch && npm run data:build"

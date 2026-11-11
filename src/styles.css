@@ -14,6 +14,7 @@
   --frame-ritual: #9db5cc;
   --frame-fusion: #a086b7;
   --frame-synchro: #cccccc;
+  --frame-darksynchro: #8c97e0; /* printed black; lightened to an indigo that clears AA on the dark rows */
   --frame-spell:  #1d9e74;
   --frame-trap:   #c36b90;
   /* Same colours as RGB triples, for tinting rows without a second palette. */
@@ -22,6 +23,7 @@
   --rgb-ritual: 157, 181, 204;
   --rgb-fusion: 160, 134, 183;
   --rgb-synchro: 204, 204, 204;
+  --rgb-darksynchro: 140, 151, 224;
   --rgb-spell:   29, 158, 116;
   --rgb-trap:   195, 107, 144;
   /* The three Egyptian Gods are Effect Monsters but do not print in the Effect
@@ -186,6 +188,7 @@ button, input, select { font: inherit; color: inherit; }
 .chip-frame-normal                        { --chip: var(--frame-normal); }
 .chip-frame-fusion                        { --chip: var(--frame-fusion); }
 .chip-frame-synchro                       { --chip: var(--frame-synchro); }
+.chip-frame-darksynchro                  { --chip: var(--frame-darksynchro); }
 .chip-frame-ritual                        { --chip: var(--frame-ritual); }
 .chip-frame-spell                         { --chip: var(--frame-spell); }
 .chip-frame-trap                          { --chip: var(--frame-trap); }
@@ -271,6 +274,7 @@ tbody .ban-Unlimited { color: #a7b0c0; }
 .row-ritual { --row-rgb: var(--rgb-ritual); }
 .row-fusion { --row-rgb: var(--rgb-fusion); }
 .row-synchro { --row-rgb: var(--rgb-synchro); }
+.row-darksynchro { --row-rgb: var(--rgb-darksynchro); }
 .row-spell  { --row-rgb: var(--rgb-spell); }
 .row-trap   { --row-rgb: var(--rgb-trap); }
 .row-god-slifer  { --row-rgb: var(--rgb-god-slifer); }
@@ -300,6 +304,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .frame-ritual { color: var(--frame-ritual); }
 .frame-fusion { color: var(--frame-fusion); }
 .frame-synchro { color: var(--frame-synchro); }
+.frame-darksynchro { color: var(--frame-darksynchro); }
 .frame-spell  { color: var(--frame-spell); }
 .frame-trap   { color: var(--frame-trap); }
 .frame-god-slifer  { color: var(--god-slifer); }

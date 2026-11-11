@@ -28,14 +28,14 @@ export interface CardSource {
 export type Stat = number | string | null;
 
 /**
- * The in-game Forbidden/Limited lists. The game ships on March 2008; the two
+ * The in-game Forbidden/Limited lists. The game ships on March 2009; the two
  * later lists were downloadable. `banStatus` on a card is the default list,
  * so filters and the table have one value to work with; the others are shown
  * in the detail panel only where they differ.
  */
-export type BanList = 'March 2008' | 'September 2008' | 'March 2009';
-export const BAN_LISTS: BanList[] = ['March 2008', 'September 2008', 'March 2009'];
-export const DEFAULT_BAN_LIST: BanList = 'March 2008';
+export type BanList = 'March 2009' | 'September 2009' | 'March 2010';
+export const BAN_LISTS: BanList[] = ['March 2009', 'September 2009', 'March 2010'];
+export const DEFAULT_BAN_LIST: BanList = 'March 2009';
 
 export interface Card {
   /**
@@ -92,7 +92,7 @@ export interface Card {
   /** Anime-only card that never had a real printing when the game shipped. */
   gameOriginal: boolean;
   sources: CardSource[];
-  /** Status on the default (March 2008) list. */
+  /** Status on the default (March 2009) list. */
   banStatus: BanStatus;
   /** Status on each list, including the default, for the detail panel. */
   banStatusByList: Record<BanList, BanStatus>;

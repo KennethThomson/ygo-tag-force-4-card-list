@@ -130,7 +130,7 @@ export default function FilterPanel({ filters, facets, activeCount, onChange, on
 
       <h2>Monster Type</h2>
       <ChipGroup options={facets.monsterTypes} selected={filters.monsterTypes} onToggle={toggle('monsterTypes')}
-        className={(o) => `chip-frame-${['Fusion', 'Synchro', 'Ritual', 'Normal'].includes(o) ? o.toLowerCase() : 'effect'}`} />
+        className={(o) => `chip-frame-${['Fusion', 'Synchro', 'Ritual', 'Normal'].includes(o) ? o.toLowerCase() : o === 'Dark Synchro' ? 'darksynchro' : 'effect'}`} />
 
       <h2>Spell / Trap Type</h2>
       <ChipGroup options={facets.spellTrapTypes} selected={filters.spellTrapTypes} onToggle={toggle('spellTrapTypes')}

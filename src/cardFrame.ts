@@ -1,6 +1,6 @@
 import type { Card } from './types';
 
-export type Frame = 'normal' | 'effect' | 'ritual' | 'fusion' | 'synchro' | 'spell' | 'trap';
+export type Frame = 'normal' | 'effect' | 'ritual' | 'fusion' | 'synchro' | 'darksynchro' | 'spell' | 'trap';
 
 /**
  * The card's frame colour category, matching the physical card.
@@ -16,6 +16,7 @@ export function frameOf(card: Card): Frame {
 
   const types = card.monsterTypes ?? [];
   if (types.includes('Fusion')) return 'fusion';
+  if (types.includes('Dark Synchro')) return 'darksynchro';
   if (types.includes('Synchro')) return 'synchro';
   if (types.includes('Ritual')) return 'ritual';
   if (types.some((t) => ['Effect', 'Flip', 'Toon', 'Spirit', 'Union'].includes(t))) return 'effect';
@@ -48,7 +49,7 @@ export function frameClass(card: Card, prefix: 'frame' | 'row'): string {
 }
 
 /** Frame order for sorting: monsters as the game groups them, then Spells, then Traps. */
-export const FRAME_ORDER: Frame[] = ['normal', 'effect', 'ritual', 'fusion', 'synchro', 'spell', 'trap'];
+export const FRAME_ORDER: Frame[] = ['normal', 'effect', 'ritual', 'fusion', 'synchro', 'darksynchro', 'spell', 'trap'];
 
 /** The Type column's text: monster subtypes, or "<Property> Spell/Trap". */
 export const subtype = (c: Card) =>
@@ -61,6 +62,7 @@ export const FRAME_LABEL: Record<Frame, string> = {
   ritual: 'Ritual',
   fusion: 'Fusion',
   synchro: 'Synchro',
+  darksynchro: 'Dark Synchro',
   spell: 'Spell',
   trap: 'Trap',
 };
