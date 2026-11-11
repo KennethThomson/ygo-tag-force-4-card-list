@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+tsconfig.tsbuildinfo
+
+# Scrape/build tooling is kept local, not published.
+/scripts/
+
+# So is everything it reads and writes: the scraped wiki pages, any guides,
+# the hand-curated overrides and source screenshots. None of it is needed to
+# build the site, which consumes only src/data/*.json.
+# (Anchored to the root on purpose: an unanchored "data/" also matches
+# src/data/, which holds the two files the app actually reads.)
+/data/
+
+# The handoff and decision record stay local too, like the tooling they
+# describe; the public README is deliberately kept shallow.
+/CLAUDE.md
+/STATUS.md

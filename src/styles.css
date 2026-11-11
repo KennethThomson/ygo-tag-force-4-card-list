@@ -1,0 +1,548 @@
+:root {
+  --bg: #0f1115;
+  --panel: #161a21;
+  --panel-2: #1b2029;
+  --line: #262d38;
+  --text: #e6e9ef;
+  --muted: #8b95a7;
+  --accent: #5b9dff;
+  /* Official card frame colours, per Yugipedia's "Card colors" page.
+     Trap is lightened 10% toward white (#BC5A84 -> #c36b90) so it clears
+     WCAG AA on the dark row background; the rest pass unmodified. */
+  --frame-normal: #fde68a;
+  --frame-effect: #ff8b53;
+  --frame-ritual: #9db5cc;
+  --frame-fusion: #a086b7;
+  --frame-synchro: #cccccc;
+  --frame-spell:  #1d9e74;
+  --frame-trap:   #c36b90;
+  /* Same colours as RGB triples, for tinting rows without a second palette. */
+  --rgb-normal: 253, 230, 138;
+  --rgb-effect: 255, 139, 83;
+  --rgb-ritual: 157, 181, 204;
+  --rgb-fusion: 160, 134, 183;
+  --rgb-synchro: 204, 204, 204;
+  --rgb-spell:   29, 158, 116;
+  --rgb-trap:   195, 107, 144;
+  /* The three Egyptian Gods are Effect Monsters but do not print in the Effect
+     orange — each has its own colour, per Yugipedia's "Card colors". Ra passes
+     contrast as printed; Slifer and Obelisk are lightened toward white until
+     they clear WCAG AA on the row background, Obelisk substantially so (its
+     navy sits at 1.6:1 unmodified, which is unreadable). */
+  --god-slifer:  #ff4040;  /* #F00     lightened 25% */
+  --god-obelisk: #5f86ff;  /* #323299  hue nudged off violet toward blue, lightened to pass */
+  --god-ra:      #ffd700;  /* #FFD700  unmodified */
+  /* Row tints are a 7% wash and a solid 3px stripe — decoration, not text — so
+     they are not bound by the 4.5:1 the name and type line need. Obelisk keeps
+     a much truer navy here than its text colour can. */
+  --rgb-god-slifer:  255, 64, 64;
+  --rgb-god-obelisk: 46, 74, 192;   /* #2e4ac0, a deep blue near the printed #323299 */
+  --rgb-god-ra:      255, 215, 0;
+  /* Rarity, following the TCG foil conventions the game's rarity names come
+     from: Common has no foil, Rare a silver name, Super Rare holographic art,
+     Ultra Rare a gold name. The in-game renders don't encode rarity at a
+     resolution that can be sampled, so this follows the convention, not pixels. */
+  --rarity-common: #8f9bb0;
+  --rarity-rare: #cfd9e6;
+  --rarity-super: #5ec8d8;
+  --rarity-ultra: #f5c451;
+
+  /* Attribute colours. The printed symbols share one gold frame and carry no
+     per-attribute hue, so these follow the conventional mapping instead,
+     lightened only as far as WCAG AA requires against the brightest row tint. */
+  --attr-light: #ffd76e;
+  --attr-dark:  #c49ede;
+  --attr-earth: #cca834;
+  --attr-water: #5bb8e8;
+  --attr-fire:  #ff8a7d;
+  --attr-wind:  #7fd18f;
+  /* DIVINE belongs to the three Egyptian Gods alone. Taken from the printed
+     symbol, which is a pale cream over warm gold rather than one of the six
+     saturated attribute hues — so it stays in the gold family without being
+     mistaken for LIGHT, which it sits next to in the filter panel. */
+  --attr-divine: #f3dfae;
+
+  --forbidden: #ff6b6b;
+  --limited: #ffa94d;
+  --semi: #ffd43b;
+  --radius: 7px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select { font: inherit; color: inherit; }
+
+/* ---------------------------------------------------------------- layout */
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--line);
+  background: var(--panel); flex: none;
+}
+/* The game icon is 32x32 native, so it stays crisp at 22px. */
+.applogo { flex: none; border-radius: 4px; }
+.topbar h1 { font-size: 14px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+.topbar .sub { color: var(--muted); font-size: 12px; margin-left: 6px; }
+.topbar .spacer { flex: 1; }
+
+.tabs { display: flex; gap: 4px; }
+.tab {
+  background: none; border: 1px solid transparent; color: var(--muted);
+  padding: 5px 12px; border-radius: var(--radius); cursor: pointer;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { background: var(--panel-2); border-color: var(--line); color: var(--text); }
+
+/* Filters button: opens the drawer on phones, collapses the sidebar elsewhere. */
+.filterbtn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin-right: 4px; }
+.filterbtn[aria-pressed="true"] { background: var(--panel-2); border-color: var(--line); color: var(--text); }
+.filterbtn .n {
+  padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  background: var(--accent); color: #08111f;
+}
+
+.body { display: flex; flex: 1; min-height: 0; }
+
+/* --------------------------------------------------------------- filters */
+/* Wrapper exists so the panel can become a drawer on narrow screens. On desktop
+   it must be invisible to layout: stretch to the row and let .filters fill it,
+   otherwise the panel ends at its content height while the table runs full
+   height. min-height:0 keeps the panel's own scrolling working. */
+.filterhost { display: flex; flex: none; min-height: 0; }
+
+.filters {
+  width: 260px; flex: none; overflow-y: auto; padding: 0 14px 14px;
+  border-right: 1px solid var(--line); background: var(--panel);
+}
+
+/* Sticky so "Clear" is always reachable, however far down the list you are. */
+.filterhead {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 -14px 4px; padding: 12px 14px;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.filterhead .label { font-size: 12px; font-weight: 650; }
+.filterhead .n {
+  padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: var(--accent); color: #08111f;
+}
+.filterhead .spacer { flex: 1; }
+.filterhead .clear {
+  padding: 4px 10px; border-radius: var(--radius); cursor: pointer;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+}
+.filterhead .clear:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.filterhead .clear:disabled { opacity: .4; cursor: default; }
+.filters h2 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); margin: 18px 0 7px; font-weight: 600;
+}
+.filters h2:first-child { margin-top: 0; }
+
+.search {
+  width: 100%; padding: 8px 10px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: var(--radius); outline: none;
+}
+.search:focus { border-color: var(--accent); }
+
+.searchwrap { position: relative; }
+/* Hint for the "/" shortcut; hidden once there is a query so it never
+   overlaps the text. */
+.searchwrap .hint {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  padding: 1px 6px; border-radius: 4px; pointer-events: none;
+  border: 1px solid var(--line); background: var(--bg);
+  color: var(--muted); font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.searchwrap:focus-within .hint { display: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+/* A chip row directly under a dropdown (the Exclusive toggle) needs air. */
+.control + .chips { margin-top: 8px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel-2); color: var(--muted);
+  transition: background .12s, border-color .12s, color .12s;
+}
+.chip .icon { margin: 0; }
+.chip:hover { color: var(--text); border-color: #3a4454; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #08111f; font-weight: 600; }
+
+/* Chips that map to a colour the table already uses tint to match, so the
+   filter reads as the same vocabulary as the rows it produces. */
+.chip[data-tint] { --chip: var(--line); }
+.chip-frame-monster, .chip-frame-effect  { --chip: var(--frame-effect); }
+.chip-frame-normal                        { --chip: var(--frame-normal); }
+.chip-frame-fusion                        { --chip: var(--frame-fusion); }
+.chip-frame-synchro                       { --chip: var(--frame-synchro); }
+.chip-frame-ritual                        { --chip: var(--frame-ritual); }
+.chip-frame-spell                         { --chip: var(--frame-spell); }
+.chip-frame-trap                          { --chip: var(--frame-trap); }
+.chip-rarity-ultra-rare                   { --chip: var(--rarity-ultra); }
+.chip-rarity-super-rare                   { --chip: var(--rarity-super); }
+.chip-rarity-rare                         { --chip: var(--rarity-rare); }
+.chip-rarity-common                       { --chip: var(--rarity-common); }
+.chip-ban-Forbidden                       { --chip: var(--forbidden); }
+.chip-ban-Limited                         { --chip: var(--limited); }
+.chip-ban-Semi-Limited                    { --chip: var(--semi); }
+
+/* This selector matches every chip-* class, including any whose colour has no
+   rule above. An undefined var(--chip) is invalid at computed-value time and
+   drops the declaration entirely, so each use carries a fallback and an
+   unmapped chip degrades to the plain chip styling instead of breaking. */
+[class*="chip-"]:not([aria-pressed="true"]) {
+  color: var(--chip, var(--muted));
+  border-color: color-mix(in srgb, var(--chip, var(--line)) 35%, var(--line));
+}
+[class*="chip-"]:not([aria-pressed="true"]):hover { border-color: var(--chip, var(--line)); }
+[class*="chip-"][aria-pressed="true"] {
+  background: var(--chip, var(--accent)); border-color: var(--chip, var(--accent));
+  color: #0d1117; font-weight: 650;
+}
+
+select.control {
+  width: 100%; padding: 7px 9px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: var(--radius); outline: none;
+}
+
+.range { display: flex; align-items: center; gap: 6px; }
+.range input {
+  width: 100%; min-width: 0; padding: 6px 8px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: var(--radius); outline: none;
+}
+.range span { color: var(--muted); }
+
+/* ----------------------------------------------------------------- table */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.count { padding: 8px 14px; color: var(--muted); border-bottom: 1px solid var(--line); flex: none; }
+.count b { color: var(--text); }
+
+.scroll { flex: 1; overflow: auto; }
+/* Fixed columns total 918px. Rather than let Name absorb every pixel lost to
+   the detail panel - it drops to 56px on a 1280px screen with the panel open -
+   the table holds a floor and scrolls sideways instead. */
+table {
+  width: 100%; min-width: 1118px;
+  border-collapse: collapse; table-layout: fixed;
+}
+
+thead th {
+  position: sticky; top: 0; z-index: 1; text-align: left;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  padding: 8px 10px; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--muted); cursor: pointer; user-select: none;
+  font-weight: 600; white-space: nowrap;
+}
+thead th:hover { color: var(--text); }
+thead th .arrow { color: var(--accent); }
+
+tbody tr {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(38, 45, 56, .5);
+  /* Each row carries its frame colour via --row-rgb; tint stays low so the
+     list reads as colour-coded rather than as a block of colour. */
+  background: rgba(var(--row-rgb), .07);
+  box-shadow: inset 3px 0 0 rgb(var(--row-rgb));
+}
+tbody tr:hover { background: rgba(var(--row-rgb), .15); }
+tbody tr[aria-selected="true"] {
+  background: rgba(var(--row-rgb), .22);
+  box-shadow: inset 3px 0 0 rgb(var(--row-rgb)), inset 0 0 0 1px rgba(var(--row-rgb), .45);
+}
+tbody tr.pad { background: none; box-shadow: none; }
+
+/* The dash for Unlimited sits on a tinted row, where the sidebar's --muted
+   would fall under 4.5:1. Lifted here only, leaving the rest of the UI alone. */
+tbody .ban-Unlimited { color: #a7b0c0; }
+
+.row-normal { --row-rgb: var(--rgb-normal); }
+.row-effect { --row-rgb: var(--rgb-effect); }
+.row-ritual { --row-rgb: var(--rgb-ritual); }
+.row-fusion { --row-rgb: var(--rgb-fusion); }
+.row-synchro { --row-rgb: var(--rgb-synchro); }
+.row-spell  { --row-rgb: var(--rgb-spell); }
+.row-trap   { --row-rgb: var(--rgb-trap); }
+.row-god-slifer  { --row-rgb: var(--rgb-god-slifer); }
+.row-god-obelisk { --row-rgb: var(--rgb-god-obelisk); }
+.row-god-ra      { --row-rgb: var(--rgb-god-ra); }
+td { padding: 6px 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.attr-LIGHT { color: var(--attr-light); }
+.attr-DARK  { color: var(--attr-dark); }
+.attr-EARTH { color: var(--attr-earth); }
+.attr-WATER { color: var(--attr-water); }
+.attr-FIRE  { color: var(--attr-fire); }
+.attr-WIND  { color: var(--attr-wind); }
+.attr-DIVINE { color: var(--attr-divine); }
+
+.chip-attr-LIGHT { --chip: var(--attr-light); }
+.chip-attr-DARK  { --chip: var(--attr-dark); }
+.chip-attr-EARTH { --chip: var(--attr-earth); }
+.chip-attr-WATER { --chip: var(--attr-water); }
+.chip-attr-FIRE  { --chip: var(--attr-fire); }
+.chip-attr-WIND  { --chip: var(--attr-wind); }
+.chip-attr-DIVINE { --chip: var(--attr-divine); }
+
+.frame-normal { color: var(--frame-normal); }
+.frame-effect { color: var(--frame-effect); }
+.frame-ritual { color: var(--frame-ritual); }
+.frame-fusion { color: var(--frame-fusion); }
+.frame-synchro { color: var(--frame-synchro); }
+.frame-spell  { color: var(--frame-spell); }
+.frame-trap   { color: var(--frame-trap); }
+.frame-god-slifer  { color: var(--god-slifer); }
+.frame-god-obelisk { color: var(--god-obelisk); }
+.frame-god-ra      { color: var(--god-ra); }
+
+
+.ban { font-weight: 600; }
+.ban-Forbidden { color: var(--forbidden); }
+.ban-Limited { color: var(--limited); }
+.ban-Semi-Limited { color: var(--semi); }
+.ban-Unlimited { color: var(--muted); font-weight: 400; }
+
+.tag {
+  display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+}
+
+.empty { padding: 48px 16px; text-align: center; color: var(--muted); }
+
+/* ---------------------------------------------------------------- detail */
+.detail {
+  width: 340px; flex: none; overflow-y: auto; padding: 16px;
+  border-left: 1px solid var(--line); background: var(--panel);
+}
+.detail .close { float: right; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
+.detail .close:hover { color: var(--text); }
+.detail h3 { margin: 0 8px 5px 0; font-size: 16px; line-height: 1.25; }
+.detail .id {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  color: var(--muted); font-size: 12px; margin-bottom: 14px;
+}
+.detail .id .num { font-variant-numeric: tabular-nums; }
+.detail .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .3px; }
+.tag-accent { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); color: var(--accent); }
+
+/* Small filled pill for values that carry their own colour. */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+.badge .icon { margin: 0; }
+.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 0 14px; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; }
+.detail .cardtext {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 10px; margin-bottom: 14px;
+  white-space: pre-wrap; line-height: 1.55;
+}
+.detail h4 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); margin: 0 0 7px; font-weight: 600;
+}
+.source {
+  display: block; width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--panel-2);
+  border-radius: var(--radius); padding: 8px 10px; margin-bottom: 6px;
+}
+/* Pack sources filter the list to that pack; other sources are not actionable. */
+button.source.is-link { cursor: pointer; }
+button.source.is-link:hover { border-color: var(--accent); background: #1d2735; }
+.source .nm { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.source .nm .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.source .kind { display: inline-flex; color: var(--muted); flex: none; }
+button.source.is-link:hover .kind { color: var(--accent); }
+.badge.rarity { font-size: 11px; flex: none; }
+.rarity { font-weight: 600; }
+.rarity-common { color: var(--rarity-common); }
+.rarity-rare   { color: var(--rarity-rare); }
+.rarity-super  { color: var(--rarity-super); }
+.rarity-ultra  { color: var(--rarity-ultra); }
+.source .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.links { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.links a { color: var(--accent); text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+
+/* ------------------------------------------------------------- pack view */
+.packs { flex: 1; overflow-y: auto; padding: 16px; }
+.packgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.packcard {
+  border: 1px solid var(--line); background: var(--panel);
+  border-radius: var(--radius); padding: 12px; cursor: pointer;
+}
+.packcard:hover { border-color: var(--accent); }
+.packcard h3 { margin: 0 0 4px; font-size: 14px; }
+.packcard .unlock { color: var(--muted); margin-bottom: 8px; }
+/* Unlock conditions are alternatives: one bullet each, tight spacing. */
+ul.unlock { margin: 0; padding-left: 16px; }
+ul.unlock li { margin: 2px 0; }
+.source ul.unlock { padding-left: 14px; }
+.packcard .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------------------------------------------------------------- images */
+/* Card art is the in-game PSP render at its native 108x152; scaling it up
+   past ~1.6x just shows the source pixels, so the box stays modest. */
+.cardart {
+  display: block; width: 172px; height: auto; margin: 0 auto 14px;
+  border-radius: 5px; background: var(--panel-2);
+  border: 1px solid var(--line); image-rendering: auto;
+}
+
+.packcard { display: flex; gap: 12px; align-items: flex-start; }
+.packcard .art {
+  width: 64px; height: 128px; flex: none; border-radius: 4px;
+  border: 1px solid var(--line); background: var(--panel-2); object-fit: cover;
+}
+.packcard .info { min-width: 0; flex: 1; }
+
+/* --------------------------------------------------------- pack banner */
+.packbanner {
+  display: flex; gap: 14px; align-items: flex-start; flex: none;
+  padding: 12px 14px; border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.packbanner .art {
+  width: 64px; height: 128px; flex: none; border-radius: 4px;
+  border: 1px solid var(--line); background: var(--panel-2); object-fit: cover;
+}
+.packbanner .info { flex: 1; min-width: 0; }
+.packbanner h2 { margin: 0 0 3px; font-size: 16px; }
+.packbanner .unlock { color: var(--muted); margin-bottom: 8px; }
+.packbanner .stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.packbanner .clear {
+  flex: none; padding: 5px 12px; border-radius: var(--radius); cursor: pointer;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+}
+.packbanner .clear:hover { color: var(--text); border-color: var(--accent); }
+
+td.rarity, th.rarity { font-weight: 600; }
+
+/* -------------------------------------------------------------- icons */
+.icon { vertical-align: -3px; flex: none; }
+img.icon { object-fit: contain; }
+/* Spacing lives on the icon rather than on literal spaces in the markup, so
+   it stays consistent wherever an icon precedes a label. */
+td .icon { margin-right: 6px; }
+th .icon { margin-right: 5px; opacity: .8; }
+.detail dd .icon { margin-right: 5px; }
+.source .nm .icon { margin: 0; }
+
+/* Rarity composition of what's on screen, best rarity first. */
+.raritybar {
+  display: flex; height: 8px; margin-top: 9px; border-radius: 4px;
+  background: var(--panel-2); border: 1px solid var(--line);
+}
+/* No overflow clip: the tooltip has to escape the bar. The segments round
+   their own outer corners instead. */
+.raritybar .seg { position: relative; display: block; height: 100%; cursor: default; }
+.raritybar .seg:first-child { border-radius: 3px 0 0 3px; }
+.raritybar .seg:last-child { border-radius: 0 3px 3px 0; }
+
+/* Hovering the bar dims every segment but the one under the cursor, so the
+   share being read is obvious even before the tooltip is registered. */
+.raritybar:hover .seg { opacity: .4; transition: opacity .12s; }
+.raritybar .seg:hover { opacity: 1; }
+
+.raritybar .tip {
+  position: absolute; bottom: calc(100% + 7px); left: 50%; translate: -50% 0;
+  padding: 3px 8px; border-radius: var(--radius); white-space: nowrap;
+  background: var(--panel-2); border: 1px solid var(--line);
+  font-size: 11px; font-weight: 600; pointer-events: none;
+  opacity: 0; transition: opacity .12s;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .5); z-index: 5;
+}
+.raritybar .seg:hover .tip { opacity: 1; }
+.raritybar .seg-ultra-rare { background: var(--rarity-ultra); }
+.raritybar .seg-super-rare { background: var(--rarity-super); }
+.raritybar .seg-rare       { background: var(--rarity-rare); }
+.raritybar .seg-common     { background: var(--rarity-common); }
+
+/* Separates the ATK and DEF pair on one line. */
+.detail dd .sep { display: inline-block; width: 12px; }
+
+
+/* ====================================================================
+   Narrow screens (<= 900px)
+
+   The desktop layout needs about 1664px: a 260px filter rail, a 340px
+   detail panel and ~1064px of table. Below the breakpoint the two side
+   panels become overlays so the table gets the full width, and the
+   table itself drops to four columns.
+   ==================================================================== */
+@media (max-width: 900px) {
+  :root { --overlay-top: 52px; }
+  .topbar { gap: 8px; padding: 9px 12px; flex-wrap: nowrap; }
+  .topbar h1 { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .sub { display: none; }
+
+  /* Overlays stop short of the top so the header, and the pack banner when
+     one is showing, stay visible behind them. The gap is also what makes
+     tapping outside to dismiss possible again. */
+  .filterhost.is-drawer,
+  .detail {
+    position: fixed; z-index: 40; inset: var(--overlay-top) 0 0 0;
+    /* The wrapper paints the sheet: .filters below is transparent so its
+       rounded corners are not squared off by an opaque child. */
+    background: var(--panel);
+    width: auto; max-height: none;
+    border: 1px solid var(--line); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, .55);
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .filterhost.is-drawer {
+    transform: translateY(100%);
+    overflow: hidden;
+    transition: transform .2s ease-out;
+  }
+  .filterhost.is-drawer.open { transform: none; }
+  .filterhost.is-drawer .filters {
+    width: 100%; height: 100%; border: none;
+    border-radius: inherit; background: transparent;
+  }
+
+  .detail { border-left: 1px solid var(--line); }
+  .detail .close { font-size: 26px; padding: 0 6px; }
+
+  /* Covers the strip left above the overlay, so tapping there dismisses it. */
+  .scrim { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .45); }
+
+  /* All columns stay; the table scrolls sideways instead of shedding them. */
+  .scroll { -webkit-overflow-scrolling: touch; }
+
+  .packgrid { grid-template-columns: 1fr; }
+  .packbanner { padding: 10px 12px; gap: 10px; }
+  .packbanner .art { width: 48px; height: 96px; }
+}
+
+/* Very small phones: reclaim the remaining horizontal space. */
+@media (max-width: 420px) {
+  :root { --overlay-top: 46px; }
+  .topbar h1 { font-size: 12px; }
+  .applogo { width: 18px; height: 18px; }
+  .cardart { width: 132px; }
+}
+
+/* An alternate-artwork card shares its name with the ordinary printing, so the
+   table marks which one a row is. */
+.variant {
+  color: var(--muted, #8b8b8b);
+  font-size: 0.92em;
+}

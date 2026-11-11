@@ -1,0 +1,34 @@
+{
+  "name": "ygo-tag-force-4-card-list",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "data:packs": "node scripts/fetch-packs.mjs",
+    "data:cards": "node scripts/fetch-cards.mjs",
+    "data:bonus": "node scripts/fetch-bonus.mjs",
+    "data:banlist": "node scripts/fetch-banlist.mjs",
+    "data:rewards": "node scripts/fetch-rewards.mjs",
+    "data:fetch": "npm run data:packs && npm run data:bonus && npm run data:banlist && npm run data:rewards && npm run data:cards",
+    "data:build": "EXPECTED_PLAYABLE=3501 node scripts/build.mjs",
+    "data:images": "node scripts/fetch-images.mjs",
+    "data:all": "npm run data:build",
+    "data:refetch": "ALLOW_NETWORK=1 npm run data:fetch && npm run data:build"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}
