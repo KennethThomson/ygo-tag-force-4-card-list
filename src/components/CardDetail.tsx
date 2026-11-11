@@ -133,7 +133,7 @@ export default function CardDetail({ card, onClose, onSelectPack }: {
       )}
 
       <div className="links">
-        {/* Always the general card page: the "(Tag Force 3)" page exists for
+        {/* Always the general card page: the "(Tag Force 4)" page exists for
             only a quarter of the pool, so linking it would 404 for the rest. */}
         <a href={`${WIKI}${encodeURIComponent(card.wikiLink)}`} target="_blank" rel="noreferrer">Yugipedia ↗</a>
         <a href={`https://ygoprodeck.com/card/?search=${encodeURIComponent(card.name)}`} target="_blank" rel="noreferrer">YGOPRODeck ↗</a>

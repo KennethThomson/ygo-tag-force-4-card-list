@@ -113,7 +113,7 @@ export default function App() {
           alt="" width={22} height={22} />
         {/* The full name does not fit beside the Filters button and tabs
             on a phone, so the franchise prefix is dropped there. */}
-        <h1>{narrow ? 'Tag Force 3 — Card List' : 'Yu-Gi-Oh! GX Tag Force 3 — Card List'}</h1>
+        <h1>{narrow ? 'Tag Force 4 — Card List' : 'Yu-Gi-Oh! 5D's Tag Force 4 — Card List'}</h1>
         <span className="sub">{CARDS.length} cards · {PACKS.length} packs</span>
         <div className="spacer" />
         {tab === 'cards' && (

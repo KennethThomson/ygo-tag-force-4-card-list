@@ -48,7 +48,7 @@ export interface Card {
    * The game's own internal card number, where known. The numbering is
    * continuous across the Tag Force series (Elemental Hero Neos is #6653 in
    * both games), so Tag Force 1's gallery supplies it for the shared cards and
-   * the `{{Tag Force 3 card}}` template for the rest that have a page. Null
+   * the `{{Tag Force 4 card}}` template for the rest that have a page. Null
    * where neither source has it.
    */
   internalNumber: number | null;
@@ -59,10 +59,10 @@ export interface Card {
    * finds otherwise.
    */
   variant: string | null;
-  /** The page whose stats and text are shown: "<Name> (Tag Force 3)" or the general page. */
+  /** The page whose stats and text are shown: "<Name> (Tag Force 4)" or the general page. */
   wikiPage: string;
   /**
-   * Outbound link target. The "(Tag Force 3)" page exists for only ~796 cards,
+   * Outbound link target. The "(Tag Force 4)" page exists for only ~1,022 cards,
    * so linking to it 404s for the rest; the card's general page always exists.
    */
   wikiLink: string;
